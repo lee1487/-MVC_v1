@@ -227,5 +227,35 @@
     - inputStream은 byte 코드를 반환한다. byte 코드를 우리가 읽을 수 
 	  있는 문자(String)로 보려면 문자표(Charset)를 지정해주어야 한다. 
 	  여기서는 UTF_8 Charset을 지정해주었다. 
-	
+```
+
+### HTTP 요청 데이터 - API 메시지 바디 - JSON 
+```
+  이번에는 HTTP API에서 주로 사용하는 JSON 형식으로 데이터를 전달해보자. 
+  
+  JSON 형식 전송 
+    - POST http://localhost:8080/request-body-json
+	- content-type: application/json 
+	- message body: {"username": "hello", "age": 20}
+	- 결과: messageBody: {"username": "hello", "age": 20}
+
+  참고 
+    - JSON 결과를 파싱해서 사용할 수 있는 자바 객체로 변환하려면 
+	  Jackso, Gson 같은 JSON 변환 라이브러리를 추가해서 사용해야 한다. 
+	  스프링 부트로 Spring MVC를 선택하면 기본으로 Jackson 라이브러리
+	  (ObjectMapper)를 함께 제공한다. 
+	- HTML form 데이터도 메시지 바디를 통해 전송되므로 직접 읽을 수 있다. 
+	  하지만 편리한 파라미터 조회 기능(request.getParameter(..))
+	  을 이미 제공하기 때문에 파라미터 조회 기능을 사용하면 된다. 
+```
+
+### HttpServletResponse - 기본 사용법 
+```
+  HttpServletResponse 역할 
+    - HTTP 응답 메시지 생성 
+	  - HTTP 응답코드 지정 
+	  - 헤더 생성 
+	  - 바디 생성
+	- 편의 기능 제공 
+	  - Content-Type, 쿠키, Redirect
 ```
