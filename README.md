@@ -259,3 +259,16 @@
 	- 편의 기능 제공 
 	  - Content-Type, 쿠키, Redirect
 ```
+
+### HTTP 응답 데이터 - 단순 텍스트, HTML
+```
+  HTTP 응답 메시지는 주로 다음 내용을 담아서 전달한다. 
+    - 단순 텍스트 응답 
+	  - 앞에서 살펴봄(writer.println("ok);)
+	- HTML 응답 
+	- HTTP API - MessageBody JSON 응답 
+
+  HttpServletResponse - HTML 응답
+    - HTTP 응답으로 HTML을 반환할 때는 content-type을 text/html로 
+	  지정해야 한다. 
+```
