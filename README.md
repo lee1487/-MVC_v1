@@ -467,4 +467,72 @@
 	  보다는, 비즈니스 로직이라 설명했다. 
 ```
 
+### MVC 패턴 - 적용
+```
+  서블릿을 컨트롤러로 사용하고, JSP를 뷰로 사용해서 MVC 패턴을 적용해보자. 
+  Model은 HttpServletRequest 객체를 사용한다. request는 내부에 데이터 저장소를 
+  가지고 있는데, request.setAttribute(), request.getAttribute()를 
+  사용하면 데이터를 보관하고, 조회할 수 있다. 
+  
+  회원 등록 
+    - 회원 등록 폼 - 컨트롤러 
+	  - hello.servlet.web.servletmvc.MvcMemberFormServlet
+	    - dispatcher.forward()
+		  - 다른 서블릿이나 JSP로 이동할 수 있는 기능이다. 서버 내부에서 다시 
+		    호출이 발생한다. 
+	
+	참고 
+	  - /WEB-INF
+	    - 이 경로안에 JSP가 있으면 외부에서 직접 JSP를 호출할 수 없다. 우리가 기대하는 것은 
+		  항상 컨트롤러를 통해서 JSP를 호출하는 것이다. 
+	
+	  - redirect vs forward 
+	    - 리다이렉트는 실제 클라이언트(웹 브라우저)에 응답이 나갔다가, 클라이언트가 redirect 
+		  경로로 다시 요청한다. 따라서 클라이언트가 인지할 수 있고, URL 경로도 실제로 변경된다. 
+		  반면에 포워드는 서버 내부에서 일어나는 호출이기 때문에 클라이언트가 전혀 인지하지 못한다. 
+
+	- 회원 등록 폼 - 뷰
+	  - main/webapp/WEB-INF/views/new-form.jsp
+	    - 여기서 form의 action을 보면 절대 경로(로 시작)이 아니라 상대경로(로 시작X)하는 것을 
+		  확인할 수 있다. 이렇게 상대 경로를 사용하면 폼 전송시 현재 URL이 속한 계층 경로 
+		  + save가 호출된다. 
+		- 현재 계층 경로: /servlet-mvc/members
+		- 결과: /servlet-mvc/members/save
+	주의 
+	  - 이후 코드에서 해당 jsp를 계속 사용하기 때문에 상대경로를 사용한 부분을 그대로 유지해야 한다.
+
+  회원 저장 
+    - 회원 저장 - 컨트롤러 
+	  - MvcMemberSaveServlet
+	    - HttpServletRequest를 Model로 사용한다. 
+		- request가 제공하는 setAttribute()를 사용하면 request 객체에 데이터를 보관해서 
+		  뷰에 전달할 수 있다. 
+		- 뷰는 request.getAttribute()를 사용해서 데이터를 꺼내면 된다. 
+	- 회원 저장 - 뷰 
+	  - main/webapp/WEB-INF/views/save-result.jsp
+	    - <%= request.getAttribute("member")%>로 모델에 저장한 member 객체를 
+		  꺼낼 수 있지만, 너무 복잡해진다. 
+		- JSP는 ${}문법을 제공하는데, 이 분법을 사용하면 request의 attribute에 담긴 
+		  데이터를 편리하게 조회할 수 있다. 
+	
+	- MVC 덕분에 컨트롤러 로직과 뷰 로직을 확실하게 분리한 것을 확인할 수 있다. 향후 화면에 수정이 
+	  발생하면 뷰 로직만 변경하면 된다.
+
+  회원 목록 조회 
+    - 회원 목록 조회 - 컨트롤러 
+	  - MvcMemberListServlet
+	    - request 객체를 사용해서 List<Member> members를 모델에 보관했다.
+	- 회원 목록 조회 - 뷰 
+	  - main/webapp/WEB-INF/views/members.jsp
+	    - 모델에 담아둔 members를 JSP가 제공하는 taglib 기능을 사용해서 반복하면서 출력했다. 
+		  members 리스트에서 member를 순서대로 꺼내서 item 변수에 담고, 출력하는 과정을 반복한다. 
+		- <c:forEach> 이 기능을 사용하려면 다음과 같이 선언해야 한다. 
+		  - <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+		  - 해당 기능을 사용하지 않고 출력하면 매우 지저분한 것을 볼 수 있다.
+		  - JSP와 같은 뷰 템플릿은 이렇게 화면을 렌더링 하는데 특화된 다양한 기능을 제공한다.
+	참고 
+	  - 앞서 설명했듯이 JSP를 학습하는 것이 이 강의의 주 목적이 아니다. JSP가 더 궁금한 분들은 
+	    이미 수 많은 자료들이 있으므로 JSP로 검색하거나 관련된 책을 참고하길 바란다. (반나절이면 대부분의 
+		기능을 학습할 수 있다.)
+```
 
