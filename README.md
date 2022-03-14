@@ -870,3 +870,48 @@
 	  없을 것이다. ControllerV4를 사용할 수 있도록 기능을 추가해보자.
 ```
 
+### 유연한 컨트롤러2 - v5 
+```
+  FrontControllerV5에 ControllerV4 기능도 추가해보자. 
+    - 핸들러 매핑(handlerMappingMap)에 ControllerV4를 사용하는 컨트롤러를 
+	  추가하고, 해당 컨트롤러를 처리할 수 있는 어댑터인 ControllerV4HandlerAdpater도
+	  추가하자. 
+
+  ControllerV4HandlerAdpater
+    - public boolean supports(Object handler) {
+		return (handler instanceof ControllerV4);
+	  }
+	  - handler가 ControllerV4인 경우에만 처리하는 어댑터이다. 
+	
+	실행 로직 
+	
+	- ControllerV4 controller = (ControllerV4) handler;
+	  Map<String, String> paramMap = createParamMap(request);
+	  Map<String, Object> model = new HashMap<>();
+	  String viewName = controller.process(paramMap, model);
+	  - handler를 ControllerV4로 캐스팅 하고, paramMap, model을 
+	    만들어서 해당 컨트롤러를 호출한다. 그리고 viewName을 반환 받는다. 
+	
+	어댑터 변환 
+	
+	ModelView mv = new ModelView(viewName);
+	mv.setModel(model);
+	return mv;
+	  - 어댑터에서 이 부분이 단순하지만 중요한 부분이다. 
+	  - 어댑터가 호출하는 ControllerV4는 뷰의 이름을 반환한다. 그런데 어댑터는 
+	    뷰의 이름이 아니라 ModelView를 만들어서 반환해야 한다. 여기서 어댑터가 
+		꼭 필요한 이유가 나온다. 
+	  - ControllerV4는 뷰의 이름을 반환했지만, 어댑터는 이것을 ModelView로 
+	    만들어서 형식을 맞추어 반환한다. 마치 110v 전기 콘센트를 220v 전기 
+		콘센트로 변경하듯이! 
+
+  어댑터와 ControllerV4
+    public interface ControllerV4 {
+		String process(Map<String, String> paramMap, Map<String, Object> model);
+	}
+	public interface MyHandlerAdapter {
+		ModelView handle(HttpServletRequest request, HttpServletResponse response,
+		Object handler) throws ServletException, IOException;
+	}
+```
+
