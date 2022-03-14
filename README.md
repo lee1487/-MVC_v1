@@ -1275,3 +1275,30 @@
 
   SpringMemberListControllerV1 - 회원 목록
 ```
+
+### 스프링 MVC - 컨트롤러 통합
+```
+  @RequestMapping을 잘 보면 클래스 단위가 아니라 메서드 단위에 적용된 것을
+  확인할 수 있다. 따라서 컨트롤러 클래스를 유연하게 하나로 통합할 수 있다.
+
+  SpringMemberControllerV2  
+    조합 
+	  - 컨트롤러 클래스를 통합하는 것을 넘어서 조합도 가능하다.ㅏ 
+	    다음 코드는 /springmvc/v2/members라는 부분에 중복이 있다. 
+		- @RequestMapping("/springmvc/v2/members/new-form")
+		- @RequestMapping("/springmvc/v2/members")
+		- @RequestMapping("/springmvc/v2/members/save")
+	
+	  - 물론 이렇게 사용해도 되지만, 컨트롤러를 통합한 예제 코들르 보면 중복을 
+	    어떻게 제거했는지 확인할 수 있다. 
+	  - 클래스 레벨에 다음과 같이 @RequestMapping을 두면 메서드 레벨과 
+	    조합이 된다. 
+		@Controller
+		@RequestMapping("/springmvc/v2/members")
+		public class SpringMemberControllerV2 {}
+	조합 결과 
+	  - 클래스 레벨 @RequestMapping("/springmvc/v2/members")
+	    - 메서드 레벨 @RequestMapping("/new-form")
+		- 메서드 레벨 @RequestMapping("/save")
+		- 메서드 레벨 @RequestMapping
+```
