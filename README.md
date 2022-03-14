@@ -626,3 +626,36 @@
 	    - JSP는 이전 MVC에서 사용했던 것을 그대로 사용한다.
 ```
 
+### View 분리 - v2 
+```
+  모든 컨트롤러에서 뷰로 이동하는 부분에 중복이 있고, 깔끔하지 않다.
+    String viewPath = "/WEB-INF/views/new-form.jsp";
+	RequestDispatcher dispatcher = request.getRequestDispatcher(viewPath);
+	dispatcher.forward(request, response);
+  이 부분을 깔끔하게 분리하기 위해 별도로 뷰를 처리하는 객체를 만들자. 
+  
+  MyView
+    - 뷰 객체는 이후 다른 버전에서도 함께 사용하므로 패키지 위치를 frontcontroller에 두었다. 
+	- 코드만 봐서는 어떻게 활용하는지 아직 감이 안올 것이다. 다음 버전의 
+	  컨트롤러 인터페이스를 만들어보자. 컨트롤러가 뷰를 반환하는 특징이 있다. 
+
+  ControllerV2
+  MemberFormControllerV2 - 회원 등록 폼
+    - 이제 각 컨트롤러는 복잡한 dispatcher.forward()를 직접 생성해서 호출하지 
+	  않아도 된다. 단순히 MyView 객체를 생성하고 거기에 뷰 이름만 넣고 반환하면 된다. 
+	- ControllerV1을 구현한 클래스와 ControllerV2를 구현한 클래스를 비교해보면, 
+	  이 부분의 중복이 확실하게 제거된 것을 확인할 수 있다.
+  MemberSaveControllerV2 - 회원 저장
+  MemberListControllerV2 - 회원 목록
+  
+  프론트 컨트롤러 V2
+    - ControllerV2의 반환 타입이 MyView이므로 프론트 컨트롤러는 컨트롤러의 호출 결과로 
+	  MyView를 반환받는다. 그리고 view.render()를 호출하면 forward 로직을 
+	  수행해서 JSP가 실행된다. 
+	- MyView.render()
+	  - 프론트 컨트롤러의 도입으로 MyView 객체의 render()를 호출하는 부분을 모두 
+	    일관되게 처리할 수 있다. 각각의 컨트롤러는 MyView 객체를 생성만 해서 반환하면 된다.
+    
+	
+```
+
