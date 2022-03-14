@@ -1,4 +1,4 @@
-package hello.servlet.web.frontcontroller.v2;
+package hello.servlet.web.frontcontroller.v2.controller;
 
 import java.io.IOException;
 import java.util.List;
@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import hello.servlet.domain.member.Member;
 import hello.servlet.domain.member.MemberRepository;
 import hello.servlet.web.frontcontroller.MyView;
+import hello.servlet.web.frontcontroller.v2.ControllerV2;
 
 public class MemberListControllerV2 implements ControllerV2{
 	

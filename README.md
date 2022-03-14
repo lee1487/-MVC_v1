@@ -655,7 +655,76 @@
 	- MyView.render()
 	  - 프론트 컨트롤러의 도입으로 MyView 객체의 render()를 호출하는 부분을 모두 
 	    일관되게 처리할 수 있다. 각각의 컨트롤러는 MyView 객체를 생성만 해서 반환하면 된다.
-    
+```
+
+### Model 추가 - v3 
+```
+  서블릿 종속성 제거 
+    - 컨트롤러 입장에서 HttpServletRequest, HttpServletResponse이 꼭 필요할까?
+	  요청 파라미터 정보는 자바의 Map으로 대신 넘기도록 하면 지금 구조에서는 컨트롤러가 
+	  서블릿 기술을 몰라도 동작할 수 있다. 
+	- 그리고 request 객체를 Model로 사용하는 대신에 별도의 Model 객체를 만들어서 
+	  반환하면 된다. 우리가 구현하는 컨트롤러가 서블릿 기술을 전혀 사용하지 않도록 변경해보자. 
+	  이렇게 하면 구현 코드도 매우 단순해지고, 테스트 코드 작성이 쉽다. 
+
+  뷰 이름 중복 제거 
+    - 컨트롤러에서 지정하는 뷰 이름에 중복이 있는 것을 확인할 수 있다. 
+	  컨트롤러는 뷰의 논리 이름을 반환하고, 실제 물리 위치의 이름은 프론트 컨트롤러에서 처리하도록 
+	  단순화하자. 
+	- 이렇게 해두면 향후 뷰의 폴더 위치가 함께 이동해도 프론트 컨트롤러만 고치면 된다. 
+	  - /WEB-INF/views/new-form.jsp -> new-form
+	  - /WEB-INF/views/save-result.jsp -> save-result
+	  - /WEB-INF/views/members.jsp -> members
+
+  ModelView
+    - 지금까지 컨트롤러에서 서블릿에 종속적인 HttpServletRequest를 사용했다. 
+	  그리고 Model도 request.setAttribute()를 통해 데이터를 저장하고 
+	  뷰에 전달했다. 서블릿의 종속성을 제거하기 위해 Model을 직접 만들고, 추가로 
+	  View 이름까지 전달하는 객체를 만들어보자. (이번 버전에서는 컨트롤러에서 
+	  HttpServletRequest를 사용할 수 없다. 따라서 직접 
+	  request.setAttribute()를 호출할 수도 없다. 따라서 Model이 
+	  별도로 필요하다.)
+	- 참고로 ModelView 객체는 다른 버전에서도 사용하므로 패키지를 frontcontroller에 둔다.
+	- 뷰의 이름과 뷰를 렌더링할 때 필요한 model 객체를 가지고 있다. model은 
+	  단순히 map으로 되어 있으므로 컨트롤러에서 뷰에 필요한 데이터를 key, value로 넣어주면 된다. 
+
+  ControllerV3
+    - 이 컨트롤러는 서블릿 기술을 전혀 사용하지 않는다. 따라서 구현이 매우 단순해지고, 
+	  테스트 코드 작성시 테스트 하기 쉽다. 
+	- HttpServletRequest가 제공하는 파라미터는 프론트 컨트롤러가 
+	  paramMap에 담아서 호출해주면 된다. 응답 결과로 뷰 이름과 뷰에 전달할 
+	  Model 데이터를 포함하는 ModelView 객체를 반환하면 된다. 
+
+  MemberFormControllerV3 - 회원 등록 폼
+    - ModelView를 생성할 때 new-form이라는 view의 논리적인 이름을 지정한다. 
+	  실제 물리적인 이름은 프론트 컨트롤러에서 처리한다.
+
+  MemberSaveControllerV3 - 회원 저장
+    - paramMap.get("username")
+	  - 파라미터 정보는 map에 담겨있다. map에서 필요한 요청 파라미터를 조회하면 된다. 
+	- mv.getModel().put("member",member);
+	  - 모델은 단순한 map이므로 모델에 뷰에서 필요한 member 객체를 담고 반환한다.
+
+  MemberListControllerV3 - 회원 목록
+  FrontControllerServletV3
+    - view.render(mv.getModel(), request, response) 코드에서 컴파일 
+	  오류가 발생할 것이다. 다음 코드를 참고해서 MyView 객체에 필요한 메서드를 추가하자. 
 	
+	- createParamMap()
+	  - HttpServletRequest에서 파라미터 정보를 꺼내서 Map으로 변환한다. 
+	    그리고 해당 Map(paramMap)을 컨트롤러에 전달하면서 호출한다. 
+	- 뷰 리졸버 
+	  - MyView view = viewResolver(viewName)
+	    - 컨트롤러가 반환한 논리 뷰 이름을 실제 물리 뷰 경로로 변경한다. 
+		  그리고 실제 물리 경로가 있는 MyView객체를 반환한다. 
+		- 논리 뷰 이름: members
+		- 물리 뷰 경로: /WEB-INF/views/member.jsp
+	  view.render(mv.getModel(), request, response)
+	    - 뷰 객체를 통해서 HTML 화면을 렌더링 한다. 
+		- 뷰 객체의 render()는 모델 정보도 함께 받는다. 
+		- JSP는 request.getAttribute()로 데이터를 조회하기 때문에, 
+		  모델의 데이터를 꺼내서 request.setAttribute()로 담아둔다. 
+		- JSP로 포워드 해서 JSP를 렌더링 한다. 
+  
 ```
 
