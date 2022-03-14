@@ -772,6 +772,101 @@
 	- 또한 중요한 사실은 여기까지 한번에 온 것이 아니라는 점이다. 프레임워크가 점진적으로 
 	  발전하는 과정 속에서 이런 방법도 찾을 수 있었다. 
 	- 프레임워크나 공통 기능이 수고로워야 사용하는 개발자가 편리해진다.
+```
+
+### 유연한 컨트롤러1 - v5 
+```
+  만약 어떤 개발자는 ControllerV3 방식으로 개발하고 싶고, 어떤 개발자는 
+  ControllerV4 방식으로 개발하고 싶다면 어떻게 해야할까? 
+    public interface ControllerV3 {
+		ModelView process(Map<String, String> paramMap);
+	}
+	
+	public interface ControllerV4 {
+		String process(Map<String, String> paramMap, 
+		Map<String,Object> model);
+	}
+
+  어댑터 패턴 
+    - 지금까지 우리가 개발한 프론트 컨트롤러는 한가지 방식의 컨트롤러 인터페이스만 
+	  사용할 수 있다. ControllerV3, ControllerV4는 완전히 다른 
+	  인터페이스이다. 따라서 호환이 불가능하다. 마치 v3는 110v이고, v4는 
+	  220v 전기 콘센트 같은 것이다. 이럴 때 사용하는 것이 바로 어댑터이다. 
+	  어댑터 패턴을 사용해서 프론트 컨트롤러가 다양한 방식의 컨트롤러를 
+	  처리할 수 있도록 변경해보자. 
+
+  V5 구조 
+    - 핸들러 어댑터
+	  - 중간에 어댑터 역할을 하는 어댑터가 추가되었는데 이름이 핸들러 어댑터이다. 
+	    여기서 어댑터 역할을 해주는 덕분에 다양한 종류의 컨트롤러를 호출할 수 있다. 
+	- 핸들러 
+	  - 컨트롤러의 이름을 더 넓은 범위인 핸들러로 변경했다. 그 이유는 이제 어댑터가 
+	    있기 때문에 꼭 컨트롤러의 개념 뿐만 아니라 어떠한 것이든 해당하는 종류의 
+		어댑터만 있으면 다 처리할 수 있기 때문이다.
+
+  MyHandlerAdapter
+    - 어댑터는 이렇게 구현해야 한다는 어댑터용 인터페이스이다.
+	- boolean supports(Object handler)
+	  - handler는 컨트롤러를 말한다. 
+	  - 어댑터가 해당 컨트롤러를 처리할 수 있는지 판단하는 메서드다. 
+	- ModelView handle(HttpServletRequest request, 
+	  HttpServletResponse response, Object handler)
+	  - 어댑터는 실제 컨트롤러를 호출하고, 그 결과로 ModelView를 반환해야 한다. 
+	  - 실제 컨트롤러가 ModelView를 반환하지 못하면, 어댑터가 ModelView를 
+	    직접 생성해서라도 반환해햐 한다. 
+	  - 이전에는 프론트 컨트롤러가 실제 컨트롤러를 호출했지만 이제는 이 어댑터를 통해서 
+	    실제 컨트롤러가 호출된다. 
+
+  실제 어댑터를 구현해보자. 
+  먼저 ControllerV3를 지원하는 어댑터를 구현하자. 
   
+  ControllerV3HandlerAdapter 
+    - 하나씩 분석해보자 
+	public boolean supports(Object handler) {
+		return (handler instanceof ControllerV3);
+	}
+	  - ControllerV3를 처리할 수 있는 어댑터를 뜻한다. 
+    ControllerV3 controller = (ControllerV3) handler;
+	Map<String, String> paramMap = createParamMap(request);
+	ModelView mv = controller.process(paramMap);
+	return mv;
+	  - handler를 컨트롤러V3로 변환한 다음에 V3 형식에 맞도록 호출한다. 
+	    supports()를 통해 ControllerV3만 지원하기 때문에 타입 변환은 
+		걱정없이 실행해도 된다. ControllerV3는 ModelView를 반환하므로 
+		그대로 ModelView를 반환하면 된다. 
+
+  FrontControllerServletV5
+    - 컨트롤러(Controller) -> 핸들러(Handler)
+	  - 이전에는 컨트롤러를 직접 매핑해서 사용했다. 그런데 이제는 어댑터를 사용하기 
+	    때문에, 컨트롤러 뿐만 아니라 어댑터가 지원하기만 하면, 어떤 것이라도 
+		URL에 매핑해서 사용할 수 있다. 그래서 이름을 컨트롤러에서 더 넓은 
+		범위의 핸들러로 변경했다. 
+	- 생성자 
+	  - 생성자는 핸들러 매핑과 어댑터를 초기화(등록)한다. 
+	- 매핑 정보 
+	  - private final Map<String, Object> handlerMappingMap 
+	    = new HashMap<>();
+	  - 매핑 정보의 값이 ControllerV3, ControllerV4 같은 인터페이스에서 
+	    아무 값이나 받을 수 있는 Object로 변경되었다.
+	- 핸들러 매핑 
+	  - Object handler = getHandler(request)
+	    - 핸들러 매핑 정보인 handlerMappingMap에서 URL에 매핑된 
+		  핸들러(컨트롤러) 객체를 찾아서 반환한다. 
+	- 핸들러를 처리할 수 있는 어댑터 조회
+	  - MyHandlerAdapter adapter = getHandlerAdapter(handler)
+	    - handler를 처리할 수 있는 어댑터를 adapter.supports(handler)
+		  를 통해서 찾는다. handler가 ControllerV3 인터페이스를 구현했다면, 
+		  ControllerV3HandlerAdapter 객체가 반환된다. 
+	- 어댑터 호출 
+	  - ModelView mv = adapter.handle(request,response,handler);
+	    - 어댑터의 handle(request,response,handler) 메서드를 통해 
+		  실제 어댑터가 호출된다. 어댑터는 handler(컨트롤러)를 호출하고 그 결과를 
+		  어댑터에 맞추어 반환한다. 
+		- ControllerV3HandlerAdapter의 경우 어댑터의 모양과 컨트롤러의 모양이 
+		  유사해서 변환 로직이 단순하다. 
+
+  정리 
+    - 지금은 V3 컨트롤러를 사용할 수 있는 어댑터와 ControllerV3만 있어서 크게 감흥이 
+	  없을 것이다. ControllerV4를 사용할 수 있도록 기능을 추가해보자.
 ```
 
