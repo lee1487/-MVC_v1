@@ -584,3 +584,45 @@
 	- 스프링 웹 MVC의 DispatcherServlet이 FrontController 패턴으로 구현되어 있음 
 ```
 
+### 프론트 컨트롤러 도입 - v1
+```
+  프론트 컨트롤러를 단계적으로 도입해보자. 
+  이번 목표는 기존 코드를 최대한 유지하면서, 프론트 컨트롤러를 도입하는 것이다.
+  먼저 구조를 맞추어두고 점진적으로 리펙터링 해보자.
+  
+  ControllerV1
+    - 서블릿과 비슷한 모양의 컨트롤러 인터페이스를 도입한다. 각 컨트롤러들은 이 인터페이스를 
+	  구현하면 된다. 프론트 컨트롤러는 이 인터페이스를 호출해서 구현과 관계없이 로직의 
+	  일관성을 가져갈 수 있다. 
+	- 이제 이 인터페이스를 구현한 컨트롤러를 만들어보자. 지금 단계에서는 기존 로직을 최대한 
+	  유지하는게 핵심이다.
+
+  MemberFormControllerV1 - 회원 등록 컨트롤러
+  MemberSaveControllerV1 - 회원 저장 컨트롤러
+  MemberListControllerV1 - 회원 목록 컨트롤러
+    - 내부 로직은 기존 서블릿과 거의 같다. 
+	  이제 프론트 컨트롤러를 만들어보자.
+
+  FrontControllerServletV1 - 프론트 컨트롤러
+    - 프론트 컨트롤러 분석 
+	  - urlPatterns
+	    - urlPatterns = "/front-controller/v1/*"
+		  - /front-controller/v1를 포함한 하위 모든 요청은 
+		    이 서블릿에서 받아들인다.. 
+		- 예) /front-controller/v1, /front-controller/v1/a,
+		  /front-controller/v1/a/b
+	
+	  controllerMap
+	    - key: 매핑 URL 
+		- value: 호출될 컨트롤러 
+	
+	  service() 
+	    - 먼저 requestURI를 조회해서 실제 호출할 컨트롤러를 controllerMap에서 찾는다. 
+		  만약 없다면 404(SC_NOT_FOUND) 상태 코드를 반환한다. 
+		- 컨트롤러를 찾고 controller.process(request,response);을 
+		  호출해서 해당 컨트롤러를 실행한다. 
+	
+	  JSP 
+	    - JSP는 이전 MVC에서 사용했던 것을 그대로 사용한다.
+```
+
