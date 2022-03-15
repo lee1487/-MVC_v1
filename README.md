@@ -1441,7 +1441,7 @@
 		- 모두 허용 GET,HEAD,POST,PUT,PATCH,DELETE
 	  - HTTP 메서드 매핑 
 	  
-	    @RequestMapping(value = "/mapping-get-v1", method = RequestMethod.GET)
+		@RequestMapping(value = "/mapping-get-v1", method = RequestMethod.GET)
 		public String mappingGetV1() {
 			log.info("mappingGetV1");
 			return "ok";
@@ -1452,7 +1452,7 @@
 	
 	  - HTTP 메서드 매핑 축약
 	  
-	    @GetMapping(value = "/mapping-get-v2")
+		@GetMapping(value = "/mapping-get-v2")
 		public String mappingGetV2() {
 			log.info("mapping-get-v2");
 			return "ok";
@@ -1463,7 +1463,7 @@
 	
 	  - PathVariable(경로 변수) 사용
 	  
-	    @GetMapping("/mapping/{userId}")
+		@GetMapping("/mapping/{userId}")
 		public String mappingPath(@PathVariable("userId") String data) {
 			log.info("mappingPath userId={}", data);
 			return "ok";
@@ -1478,7 +1478,7 @@
 	
 	  - PathVariable 사용 - 다중
 	  
-	    @GetMapping("/mapping/users/{userId}/orders/{orderId}")
+		@GetMapping("/mapping/users/{userId}/orders/{orderId}")
 		public String mappingPath(@PathVariable String userId, @PathVariable Long 
 		orderId) {
 			log.info("mappingPath userId={}, orderId={}", userId, orderId);
@@ -1487,7 +1487,7 @@
 	  
 	  - 특정 파라미터 조건 매핑 
 	  
-	    @GetMapping(value = "/mapping-param", params = "mode=debug")
+		@GetMapping(value = "/mapping-param", params = "mode=debug")
 		public String mappingParam() {
 			log.info("mappingParam");
 			return "ok";
@@ -1757,5 +1757,134 @@
 	
 	참고 
 	  - argument resolver는 뒤에서 학습한다.
+```
+
+### HTTP 요청 메시지 - 단순 텍스트 
+```
+  서블릿에서 학습한 내용을 떠올려보자. 
+    - HTTP message boyd에 데이터를 직접 담아서 요청 
+	  - HTTP API에서 주로 사용 JSON, XML, TEXT
+	  - 데이터 형식은 주로 JSON 사용 
+	  - POST, PUT, PATCH
+
+  요청 파라미터와 다르게, HTTP 메시지 바디를 통해 직접 데이터가 넘어오는 경우는 
+  @RequestParam, @ModelAttribute를 사용할 수 없다.(물론 HTML Form
+  형식으로 전달되는 경우는 요청 파라미터로 인정된다.)
+    - 먼저 가장 단순한 텍스트 메시지를 HTTP 메시지 바디에 담아서 전송하고, 읽어보자.
+	- HTTP 메시지 바디의 데이터를 InputStream을 사용해서 직접 읽을 수 있다. 
+
+  RequestBodyStringController
+    - Body -> row, Text 선택 
+
+  Input, Output 스트림, Reader - requestBodyStringV2
+    - 스프링 MVC는 다음 파라미터를 지원한다. 
+	  - InputStream(Reader): HTTP 요청 메시지 바디의 내용을 직접 조회 
+	  - OutputStream(Writer): HTTP 응답 메시지의 바디에 직접 결과 출력 
+
+  HttpEntity - requestBodyStringV3
+    - 스프링 MVC는 다음 파라미터를 지원한다. 
+	  - HttpEntity: HTTP header, body 정보를 편리하게 조회 
+	    - 메시지 바디 정보를 직접 조회 
+		- 요청 파라미터를 조회하는 기능과 관계 없음 @RequestParam X,
+		  @ModelAttribute X
+	  - HttpEntity는 응답에도 사용 가능 
+	    - 메시지 바디 정보 직접 반환 
+		- 헤더 정보 포함 가능 
+		- view 조회X
+	
+	- HttpEntity를 상속받은 다음 객체들도 같은 기능을 제공한다. 
+	  - RequestEntity
+	    - HttpMethod, url 정보가 추가, 요청에서 사용 
+	  - ResponseEntity
+	    - HTTP 상태 코드 설정 가능, 응답에서 사용 
+		- return new ResponseEntity<String>("Hello World",
+		  responseHeaders, HttpStatus,CREATED)
+	
+	참고 
+	  - 스프링 MVC 내부에서 HTTP 메시지 바디를 읽어서 문자나 객체로 변환해서 
+	    전달해주는데, 이때 HTTP 메시지 컨버터(HttpMessageConverter)라는 
+		기능을 사용한다. 이것은 조금 뒤에 HTTP 메시지 컨버터에서 자세히 설명한다. 
+
+  @RequestBody - requestBodyStringV4
+    - @RequestBody
+	  - @RequestBody를 사용하면 HTTP 메시지 바디 정보를 편리하게 조회할 수 있다. 
+	    참고로 헤더 정보가 필요하다면 HttpEntity를 사용하거나 @RequestHeader를 
+		사용하면 된다. 
+	  - 이렇게 메시지 바디를 직접 조회하는 기능은 요청 파라미터를 조회하는 RequestParam,
+	    @ModelAttribute와는 전혀 관계가 없다. 
+	
+  요청 파라미터 vs HTTP 메시지 바디 
+    - 요청 파라미터를 조회하는 기능: @RequestParam, @ModelAttribute
+	- HTTP 메시지 바디를 직접 조회하는 기능: @RequestBody
+
+  @ResponseBody
+    - @ResponseBody를 사용하면 응답 결과를 HTTP 메시지 바디에 직접 담아서 
+	  전달할 수 있다. 물론 이 경우에도 view를 사용하지 않는다.
+```
+
+### HTTP 요청 메시지 - JSON
+```
+  이번에는 HTTP API에서 주로 사용하는 JSON 데이터 형식을 조회해보자. 
+  
+  기존 서블릿에서 사용했던 방식과 비슷하게 시작해보자. 
+  
+  RequestBodyJsonController
+    - HttpServletRequest를 사용해서 직접 HTTP 메시지 바디에서 데이터를 읽어와서, 
+	  문자로 변환한다.
+	- 문자로 된 JSON 데이터를 Jackson 라이브러리인 objectMapper를 사용해서 
+	  자바 객체로 변환한다.
+
+  requestBodyJsonV2 - @RequestBody 문자 변환
+    - 이전에 학습했던 @RequestBody를 사용해서 HTTP 메시지에서 데이터를 꺼내고 
+	  messageBody에 저장한다. 
+	- 문자로 된 JSON 데이터인 messageBody를 objectMapper를 통해서  
+	  자바 객체로 변환한다. 
+
+  문자로 변환하고 다시 json으로 변환하는 과정이 불편하다. @ModelAttribute처럼 
+  한번에 객체로 변환할 수는 없을까?
+  
+  requestBodyJsonV3 - @RequestBody 객체 변환
+    - @RequestBody 객체 파라미터 
+	  - @RequestBody HelloData data
+	  - @RequestBody에 직접 만든 객체를 지정할 수 있다. 
+
+  HttpEntity, @RequestBody를 사용하면 HTTP 메시지 컨버터가 HTTP 메시지 
+  바디의 내용을 우리가 원하는 문자나 객체 등으로 반환해준다. 
+  HTTP 메시지 컨버터는 문자 뿐만 아니라 JSON 객체도 변환해주는데, 우리가 방금 V2
+  에서 했던 작업을 대신 처리해준다. 
+  자세한 내용은 뒤에서 HTTP 메시지 컨버터에서 다룬다. 
+  
+  @RequestBody는 생략 불가능 
+    - @ModelAttribute에서 학습한 내용을 떠올려보자. 
+    - 스프링은 @ModelAttribute, @RequestParam 해당 생략시 다음과 같은 
+      규칙을 적용한다.
+	  - String, int, Integer 같은 단순 타입 = @RequestParam
+	  - 나머지 = @ModelAttribute(argument resolver로 지정해둔 타입 외)
+	- 따라서 이 경우 HelloData에 @RequestBody를 생략하면 @ModelAttribute가
+	  적용되어 버린다. HelloData -> @ModelAttribute HelloData data
+	  따라서 생략하면 HTTP 메시지 바디가 아니라 요청 파라미터를 처리하게 된다. 
+
+  주의 
+    - HTTP 요청시에 content-type이 application/json인지 꼭! 확인해야 한다.
+	  그래야 JSON을 처리할 수 있는 HTTP 메시지 컨버터가 실행된다. 
+
+  물론 앞서 배운 것과 같이 HttpEntity를 사용해도 된다. 
+  requestBodyJsonV4 - HttpEntity
+	@ResponseBody
+	@PostMapping("/request-body-json-v4")
+	public String requestBodyJsonV4(HttpEntity<HelloData> httpEntity) {
+	 HelloData data = httpEntity.getBody();
+	 log.info("username={}, age={}", data.getUsername(), data.getAge());
+	 return "ok";
+	}
+
+  requestBodyJsonV5
+    - @ResponseBody 
+	  - 응답의 경우에도 @ResponseBody를 사용하면 해당 객체를 HTTP 메시지 바디에 
+	    직접 넣어줄 수 있다. 물론 이경우에도 HttpEntity를 사용해도 된다. 
+	- @RequestBody 요청 
+	  - JSON 요청 -> HTTP 메시지 컨버터 -> 객체 
+	- @ResponseBody 응답 
+	  - 객체 -> HTTP 메시시 컨버터 -> JSON 응답 
 ```
 
