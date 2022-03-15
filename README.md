@@ -1529,3 +1529,24 @@
 		  마약 맞지 않으면 HTTP 406 상태코드(Not Acceptable)을 반환한다.
 ```
 
+### 요청 매핑 - API 예시 
+```
+  회원 관리를 HTTP API로 만든다 생각하고 매핑을 어떻게 하는지 알아보자 
+  (실제 데이터가 넘어가는 부분은 생략하고 URL 매핑만)
+  
+  회원 관리 
+    - 회원 목록 조회: GET 	/users
+	- 회원 등록:	 POST	/users
+	- 회원 조회:	 GET	/users/{userId}
+	- 회원 수정:	 PATCH	/users/{userId}
+	- 회원 삭제:	 DELETE /users/{userId}
+
+  MappingClassController
+    - /mapping은 강의의 다른 예제들과 구분하기 위해 사용했다.
+	- @RequestMapping("/mapping/users")
+	  - 클래스 레벨에 매핑 정보를 두면 메서드 레벨에서 해당 정보를 조합해서 사용한다.
+
+  매핑 방법을 이해했으니, 이제부터 HTTP 요청이 보내는 데이터들을 스프링 MVC로 
+  어떻게 조회하는지 알아보자.
+```
+
