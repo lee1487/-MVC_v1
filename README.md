@@ -2206,3 +2206,48 @@
   ItemRepositoryTest - 상품 저장소 테스트
 ```
 
+### 상품 서비스 HTML 
+```
+  핵심 비즈니스 로직을 개발하는 동안, 웹 퍼블리셔는 HTML 마크업을 완료했다. 
+  다음 파일들을 경로에 넣고 잘 동작하는지 확인해보자. 
+  
+  부트스트랩 
+    - 참고로 HTML을 편리하게 개발하기 위해 부트스트랩을 사용했다. 
+	  먼저 필요한 부트스트랩 파일을 설치하자. 
+	- 부트스트랩 공식 사이트: https://getbootstrap.com
+	- 부트스트랩을 다운로드 받고 압축을 풀자 
+	  - 이동: https://getbootstrap.com/docs/5.0/getting-started/download/
+	  - Compiled CSS and JS 항목을 다운로드 하자 
+	  - 압축을 풀고 bootstrap.min.css를 복사해서 다음 폴더에 추가하자. 
+	  - resources/static/css/bootstrap.min.css
+	참고 
+	  - 부트스트랩(Bootstrap)은 웹사이트를 쉽게 만들 수 있게 도와주는 HTML,CSS,JS 
+	    프레임워크이다. 하나의 CSS로 휴대폰, 태블릿, 데스크탑까지 다양한 기기에서 작동한다. 
+		다양한 기능을 제공하여 사용자가 쉽게 웹사이트를 제작, 유지, 보수할 수 있도록 도와준다.
+
+  HTML, css 파일
+	- /resources/static/css/bootstrap.min.css -> 부트스트랩 다운로드
+	- /resources/static/html/items.html -> 아래 참조
+	- /resources/static/html/item.html
+	- /resources/static/html/addForm.html
+	- /resources/static/html/editForm.html
+	- 참고로 /resources/static에 넣어두었기 때문에 스프링 부트가 정적 리소스를 제공한다.
+	  - http://localhost:8080/html/items.html
+	  - 그런데 정적 리소스여서 해당 파일을 탐색기를 통해 직접 열어도 동작하는 것을 
+	    확인할 수 있다. 
+	
+	참고 
+	  - 이렇게 정적 리소스가 공개되는 /resources/static 폴더에 HTML을 넣어두면,
+	    실제 서비스에서도 공개된다. 서비스를 운영한다면 지금처럼 공개할 필요없는 HTML을 
+		두는 것은 주의하자.
+		
+	상품 목록 HTML
+	  - resource/static/html/items.html
+	상품 상세 HTML
+	  - resources/static/html/item.html
+	상품 등록 폼 HTML
+	  - resources/static/html/addForm.html
+	상품 수정 폼 HTML
+	  - resources/static/html/editForm.html
+```
+
