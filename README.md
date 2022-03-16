@@ -2361,4 +2361,25 @@
 	
 ```
 
+### 상품 상세 
+```
+  상품 상세 컨트롤러와 뷰를 개발하자. 
+  
+  BasicItemController에 추가 
+    - PathVariable로 넘어온 상품ID로 상품을 조회하고, 모델에 담아둔다. 
+	  그리고 뷰 템플릿을 호출한다. 
+
+  상품 상세 뷰 
+    - 정적 HTML을 뷰 템플릿(templates)영억으로 복사하고 수정하자.
+	- 속성 변경 - th:value
+	  - th:value="${item.id}"
+	    - 모델에 있는 item 정보를 획득하고 프로퍼티 접근법으로 출력한다. (item.getId())
+		- value 속성을 th:value 속성으로 변경한다. 
+	
+	- 상품 수정 링크 
+	  - th:onclick="|location.href='@{/basic/items/{itemId/edit(itemId=${item.id})}}'|"
+	  
+	- 목록으로 링크 
+	  - th:onclick="|location.href='@{/basic/items}'|"
+```
 
