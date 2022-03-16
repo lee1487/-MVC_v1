@@ -2383,3 +2383,25 @@
 	  - th:onclick="|location.href='@{/basic/items}'|"
 ```
 
+### 상품 등록 폼 
+```
+  상품 등록 폼 
+  BasicItemController에 추가 
+    - 상품 등록 폼은 단순히 뷰 템플릿만 호출한다. 
+  
+  상품 등록 폼 뷰 
+    - 정적 HTML을 뷰 템플릿(templates)영억으로 복사하고 수정하자.
+	- 속성 변경 - th:action
+	  - th:action
+	  - HTML form에서 action에 값이 없으면 현재 URL에 데이터를 전송한다. 
+	  - 상품 등록 폼의 URL과 실제 상품 등록을 처리하는 URL을 똑같이 맞추고 
+	    HTTP 메서드로 두 기능을 구분한다. 
+		- 상품 등록 폼:   GET /basic/items/add
+		- 상품 등록 처리: POST /basic/items/add
+	  - 이렇게 하면 하나의 URL로 등록 폼과, 등록 처리를 깔끔하게 처리할 수 있다. 
+	
+	- 취소 
+	  - 취소시 상품 목록으로 이동한다. 
+	  - th:onclick="|location.href='@{/basic/items}'|"
+```
+
